@@ -1,6 +1,7 @@
 ﻿using ApiCatalogo.Context;
 using ApiCatalogo.Models;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -23,8 +24,20 @@ namespace ApiCatalogo.Controllers
         //Para acessar os dados da tabela
         public ActionResult<IEnumerable<Produto>> Get()
         {
-           return _context.Produtos.ToList();
+           return _context.Produtos.AsNoTracking().ToList();
         }
 
+        // Para acessar um determinado produto
+        [HttpGet("{id}")]
+        public ActionResult<Produto> Get(int id)
+        {
+            var produto = _context.Produtos.AsNoTracking().FirstOrDefault(p => p.ProdutoId == id);
+            if (produto == null)
+            {
+                return NotFound();
+            }
+            return produto;
+
+        }
     }
 }
