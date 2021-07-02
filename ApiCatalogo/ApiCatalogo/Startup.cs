@@ -27,10 +27,11 @@ namespace ApiCatalogo
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            string mySqlConnection = Configuration.GetConnectionString("DefaultConnection");
+
             services.AddDbContext<AppDbContext>(options =>
-                    options.UseMySql(Configuration.GetConnectionString("DefaultConnection"),
-                       new MySqlServerVersion(new Version(8, 0, 11))
-                        ));
+                options.UseMySql(mySqlConnection, ServerVersion.AutoDetect(mySqlConnection)));
+
 
             services.AddControllers();
             services.AddSwaggerGen(c =>
