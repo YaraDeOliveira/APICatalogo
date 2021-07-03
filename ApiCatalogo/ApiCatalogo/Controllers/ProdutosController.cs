@@ -28,7 +28,7 @@ namespace ApiCatalogo.Controllers
         }
 
         // Para acessar um determinado produto
-        [HttpGet("{id}")]
+        [HttpGet("{id}", Name = "ObterProduto")]
         public ActionResult<Produto> Get(int id)
         {
             var produto = _context.Produtos.AsNoTracking().FirstOrDefault(p => p.ProdutoId == id);
@@ -37,6 +37,25 @@ namespace ApiCatalogo.Controllers
                 return NotFound();
             }
             return produto;
+        }
+        [HttpPost]
+        public ActionResult Post([FromBody]Produto produto)
+        {
+
+            // Essa verificacao é feita automaticamente a partir da versao 2.1
+            // Porém ter que usar [ApiController] 
+            //if (!ModelState.IsValid)
+            //{
+            //    return BadRequest(ModelState);
+            //}
+
+            _context.Produtos.Add(produto);
+            _context.SaveChanges();
+            return new CreatedAtRouteResult(
+                "ObterProduto", 
+                new { id = produto.ProdutoId }, 
+                produto );
+
 
         }
     }
