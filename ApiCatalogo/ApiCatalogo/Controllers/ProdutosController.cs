@@ -55,8 +55,43 @@ namespace ApiCatalogo.Controllers
                 "ObterProduto", 
                 new { id = produto.ProdutoId }, 
                 produto );
-
-
         }
+        [HttpPut("{id}")]
+
+        public ActionResult Put (int id, [FromBody] Produto produto)
+        {
+            // Essa verificacao é feita automaticamente a partir da versao 2.1
+            // Porém ter que usar [ApiController] 
+            //if (!ModelState.IsValid)
+            //{
+            //    return BadRequest(ModelState);
+            //}
+
+
+            if (id != produto.ProdutoId)
+            {
+                return BadRequest();
+            }
+            _context.Entry(produto).State = EntityState.Modified;
+            _context.SaveChanges();
+            return Ok();
+        }
+        [HttpDelete("{id}")]
+        public ActionResult<Produto> Delete (int id)
+        {
+            //var produto = _context.Produtos.FirstOrDefault(p => p.ProdutoId == id);
+            // Find só funciona se o parametro for a chave primaria
+            var produto = _context.Produtos.Find(id);
+            
+            if (produto == null)
+            {
+                return NotFound();
+            }
+
+            _context.Produtos.Remove(produto);
+            _context.SaveChanges();
+            return produto;
+        }
+
     }
 }
