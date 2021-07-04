@@ -12,8 +12,8 @@ namespace ApiCatalogo.Models
     {
         [Key]
         public int ProdutoId { get; set; }
-        [Required]
-        [MaxLength(80)]
+        [Required(ErrorMessage = "O nome é obrigatorio")]
+        [StringLength(80, ErrorMessage ="O nome de conter até 80 caracteres")]
         public string Nome { get; set; }
         [Required]
         [MaxLength(300)]

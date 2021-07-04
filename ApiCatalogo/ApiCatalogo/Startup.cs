@@ -57,12 +57,19 @@ namespace ApiCatalogo
                 app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "ApiCatalogo v1"));
             }
 
+            // adiciona o middleware de roteamento
             app.UseRouting();
 
+            // Add o middleware q executa o endpoint do
+            // request atual
             app.UseAuthorization();
 
+            //Adiciona o middleware para executar o endpoint
+            // do request atual
             app.UseEndpoints(endpoints =>
             {
+                // adiciona os endpoints para os actions
+                // dos controladores sem especificar rotas
                 endpoints.MapControllers();
             });
         }
