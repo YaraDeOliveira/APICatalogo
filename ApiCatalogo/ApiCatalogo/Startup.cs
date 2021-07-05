@@ -59,6 +59,8 @@ namespace ApiCatalogo
 
             // adiciona o middleware de roteamento
             app.UseRouting();
+             
+            // app.UseAuthentication()
 
             // Add o middleware q executa o endpoint do
             // request atual
