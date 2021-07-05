@@ -2,6 +2,7 @@ using ApiCatalogo.Context;
 using ApiCatalogo.Extensions;
 using ApiCatalogo.Filter;
 using ApiCatalogo.Logging;
+using ApiCatalogo.Repository;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
@@ -33,11 +34,16 @@ namespace ApiCatalogo
         {
             services.AddScoped<ApiLoggingFilter>();
 
+            // incluir o Unit of Work no ConfigureServices 
+            services.AddScoped<IUnitOfWork, UnitOfWork>();
+
             string mySqlConnection = Configuration.GetConnectionString("DefaultConnection");
 
             services.AddDbContext<AppDbContext>(options =>
                 options.UseMySql(mySqlConnection, ServerVersion.AutoDetect(mySqlConnection)));
 
+
+            
 
             services.AddControllers().AddNewtonsoftJson(options =>
             {
