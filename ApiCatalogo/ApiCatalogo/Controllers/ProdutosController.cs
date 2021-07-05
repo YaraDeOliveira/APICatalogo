@@ -1,4 +1,5 @@
 ﻿using ApiCatalogo.Context;
+using ApiCatalogo.Filter;
 using ApiCatalogo.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -22,6 +23,7 @@ namespace ApiCatalogo.Controllers
             _context = context;
         }
         [HttpGet]
+        [ServiceFilter(typeof(ApiLoggingFilter))]
         //Para acessar os dados da tabela
         public async Task<ActionResult<IEnumerable<Produto>>> GetAsync()
         {
