@@ -1,6 +1,7 @@
 using ApiCatalogo.Context;
 using ApiCatalogo.Extensions;
 using ApiCatalogo.Filter;
+using ApiCatalogo.Logging;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
@@ -52,10 +53,10 @@ namespace ApiCatalogo
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, ILoggerFactory loggerFactory)
         {
             // adiciona o middleware de tratamento de erros
-            app.ConfigureExceptionHandler();
+            //app.ConfigureExceptionHandler();
 
 
             if (env.IsDevelopment())
@@ -64,6 +65,15 @@ namespace ApiCatalogo
                 app.UseSwagger();
                 app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "ApiCatalogo v1"));
             }
+
+            loggerFactory.AddProvider(new CustomLoggerProvider(new CustomLoggerProviderConfiguration 
+                {
+                    LogLevel = LogLevel.Information
+                }
+                )); ; 
+
+
+
 
             // adiciona o middleware de roteamento
             app.UseRouting();

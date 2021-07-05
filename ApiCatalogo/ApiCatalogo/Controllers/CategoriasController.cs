@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -17,11 +18,14 @@ namespace ApiCatalogo.Controllers
     {
         private readonly AppDbContext _context;
         private readonly IConfiguration _configuration;
+        private readonly ILogger _logger;
 
-        public CategoriasController(AppDbContext context, IConfiguration config)
+        public CategoriasController(AppDbContext context, IConfiguration config,
+            ILogger <CategoriasController> logger)
         {
             _context = context;
             _configuration = config;
+            _logger = logger;
         }
 
         [HttpGet("autor")]
@@ -36,6 +40,7 @@ namespace ApiCatalogo.Controllers
         {
             try
             {
+                _logger.LogInformation("============GET api/categorias/produtos ============");
                 return _context.Categorias.Include(x => x.Produtos).ToList();
             }
             catch (Exception)
