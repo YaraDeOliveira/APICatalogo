@@ -1,6 +1,8 @@
-﻿using ApiCatalogo.Filter;
+﻿using ApiCatalogo.DTOs;
+using ApiCatalogo.Filter;
 using ApiCatalogo.Models;
 using ApiCatalogo.Repository;
+using AutoMapper;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System;
@@ -15,26 +17,33 @@ namespace ApiCatalogo.Controllers
     {
         //Injeção da interface
         private readonly IUnitOfWork _uof;
+        private readonly IMapper _mapper;
 
-        public ProdutosController(IUnitOfWork context)
+        public ProdutosController(IUnitOfWork context, IMapper mapper)
         {
             _uof = context;
+            _mapper = mapper;
         }
         [HttpGet("menorpreco")]
-        public ActionResult<IEnumerable<Produto>> GetProdutosPrecos()
+        public ActionResult<IEnumerable<ProdutoDTO>> GetProdutosPrecos()
         {
-            return _uof.ProdutoRepository.GetProdutosPorPreco().ToList();
+            var produtos = _uof.ProdutoRepository.GetProdutosPorPreco().ToList();
+            var produtosDto = _mapper.Map<List<ProdutoDTO>>(produtos);
+            return produtosDto;
         }
 
 
         [HttpGet]
         [ServiceFilter(typeof(ApiLoggingFilter))]
         //Para acessar os dados da tabela
-        public ActionResult<IEnumerable<Produto>> Get()
+        public ActionResult<IEnumerable<ProdutoDTO>> Get()
         {
             try
             {
-                return  _uof.ProdutoRepository.Get().ToList();
+                var produtos = _uof.ProdutoRepository.Get().ToList();
+                var produtosDto = _mapper.Map<List<ProdutoDTO>>(produtos);
+                return produtosDto;
+                
             }
             catch (Exception)
             {
@@ -45,16 +54,19 @@ namespace ApiCatalogo.Controllers
 
         // Para acessar um determinado produto
         [HttpGet("{id}", Name = "ObterProduto")]
-        public ActionResult<Produto> Get(int id)
+        public ActionResult<ProdutoDTO> Get(int id)
         {
             try
             {
                 var produto = _uof.ProdutoRepository.GetById(p => p.ProdutoId == id);
+
                 if (produto == null)
-                { 
+                {
                     return NotFound($"O produto com id = {id} não foi localizado.");
                 }
-                return produto;
+
+                var produtoDto = _mapper.Map<ProdutoDTO>(produto);
+                return produtoDto;
             }
             catch(Exception)
             {
@@ -63,7 +75,7 @@ namespace ApiCatalogo.Controllers
             }
         }
         [HttpPost]
-        public ActionResult Post([FromBody]Produto produto)
+        public ActionResult Post([FromBody]ProdutoDTO produtoDto)
         {
 
             // Essa verificacao é feita automaticamente a partir da versao 2.1
@@ -73,11 +85,17 @@ namespace ApiCatalogo.Controllers
             //    return BadRequest(ModelState);
             //}
             try {
+
+                var produto = _mapper.Map<Produto>(produtoDto);
                 _uof.ProdutoRepository.Add(produto);
                 _uof.Commit();
+
+                // Tem que exibir o produtoDto e nao o produto
+                var produtoDTO = _mapper.Map<ProdutoDTO>(produto);
+
                 return new CreatedAtRouteResult(
                     "ObterProduto",
-                    new { id = produto.ProdutoId }, produto);
+                    new { id = produtoDto.ProdutoId }, produtoDTO);
             }
             catch (Exception)
             {
@@ -87,7 +105,7 @@ namespace ApiCatalogo.Controllers
         }
         [HttpPut("{id}")]
 
-        public ActionResult Put (int id, [FromBody] Produto produto)
+        public ActionResult Put (int id, [FromBody] ProdutoDTO produtoDto)
         {
             // Essa verificacao é feita automaticamente a partir da versao 2.1
             // Porém ter que usar [ApiController] 
@@ -98,12 +116,16 @@ namespace ApiCatalogo.Controllers
             try
             {
 
-                if (id != produto.ProdutoId)
+                if (id != produtoDto.ProdutoId)
                 {
                     return BadRequest($"O produto com id = {id} não foi localizado.");
                 }
+
+                var produto = _mapper.Map<Produto>(produtoDto);
+
                 _uof.ProdutoRepository.Update(produto);
                 _uof.Commit();
+
                 return Ok($"Produto com o id = {id} foi atualizado com sucesso");
             }
             catch (Exception)
@@ -113,7 +135,7 @@ namespace ApiCatalogo.Controllers
             }
         }
         [HttpDelete("{id}")]
-        public ActionResult<Produto> Delete (int id)
+        public ActionResult<ProdutoDTO> Delete (int id)
         {
             //var produto = _context.Produtos.FirstOrDefault(p => p.ProdutoId == id);
             // Find só funciona se o parametro for a chave primaria
@@ -129,7 +151,11 @@ namespace ApiCatalogo.Controllers
 
                 _uof.ProdutoRepository.Delete(produto);
                 _uof.Commit();
-                return produto;
+
+                // Tem que exibir o produtoDto e nao o produto
+                var produtoDTO = _mapper.Map<ProdutoDTO>(produto);
+
+                return produtoDTO;
             }
             catch (Exception)
             {
