@@ -21,7 +21,7 @@ namespace ApiCatalogo.Repository
 
         public PagedList<Produto> GetProdutos(ProdutosParameters produtosParameters)
         {
-            return PagedList<Produto>.ToPagedList(Get().OrderBy(on => on.Nome),
+            return PagedList<Produto>.ToPagedList(Get().OrderBy(on => on.ProdutoId),
               produtosParameters.PageNumber,
               produtosParameters.PageSize);
                 
