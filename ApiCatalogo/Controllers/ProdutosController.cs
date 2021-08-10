@@ -10,6 +10,7 @@ using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace ApiCatalogo.Controllers
 {
@@ -27,9 +28,9 @@ namespace ApiCatalogo.Controllers
             _mapper = mapper;
         }
         [HttpGet("menorpreco")]
-        public ActionResult<IEnumerable<ProdutoDTO>> GetProdutosPrecos()
+        public async Task<ActionResult<IEnumerable<ProdutoDTO>>> GetProdutosPrecos()
         {
-            var produtos = _uof.ProdutoRepository.GetProdutosPorPreco().ToList();
+            var produtos = await _uof.ProdutoRepository.GetProdutosPorPreco();
             var produtosDto = _mapper.Map<List<ProdutoDTO>>(produtos);
             return produtosDto;
         }
@@ -38,12 +39,12 @@ namespace ApiCatalogo.Controllers
         [HttpGet]
         [ServiceFilter(typeof(ApiLoggingFilter))]
         //Para acessar os dados da tabela
-        public ActionResult<IEnumerable<ProdutoDTO>> Get([FromQuery] ProdutosParameters produtosParameters)
+        public async Task<ActionResult<IEnumerable<ProdutoDTO>>> Get([FromQuery] ProdutosParameters produtosParameters)
         {
             try
             {
 
-                var produtos = _uof.ProdutoRepository.GetProdutos(produtosParameters);
+                var produtos = await _uof.ProdutoRepository.GetProdutos(produtosParameters);
 
                 var metadata = new
                 {
@@ -71,11 +72,11 @@ namespace ApiCatalogo.Controllers
 
         // Para acessar um determinado produto
         [HttpGet("{id}", Name = "ObterProduto")]
-        public ActionResult<ProdutoDTO> Get(int id)
+        public async Task<ActionResult<ProdutoDTO>> Get(int id)
         {
             try
             {
-                var produto = _uof.ProdutoRepository.GetById(p => p.ProdutoId == id);
+                var produto = await _uof.ProdutoRepository.GetById(p => p.ProdutoId == id);
 
                 if (produto == null)
                 {
@@ -92,7 +93,7 @@ namespace ApiCatalogo.Controllers
             }
         }
         [HttpPost]
-        public ActionResult Post([FromBody]ProdutoDTO produtoDto)
+        public async Task<ActionResult> Post([FromBody]ProdutoDTO produtoDto)
         {
 
             // Essa verificacao é feita automaticamente a partir da versao 2.1
@@ -105,7 +106,7 @@ namespace ApiCatalogo.Controllers
 
                 var produto = _mapper.Map<Produto>(produtoDto);
                 _uof.ProdutoRepository.Add(produto);
-                _uof.Commit();
+                await _uof.Commit();
 
                 // Tem que exibir o produtoDto e nao o produto
                 var produtoDTO = _mapper.Map<ProdutoDTO>(produto);
@@ -122,7 +123,7 @@ namespace ApiCatalogo.Controllers
         }
         [HttpPut("{id}")]
 
-        public ActionResult Put (int id, [FromBody] ProdutoDTO produtoDto)
+        public async Task<ActionResult> Put (int id, [FromBody] ProdutoDTO produtoDto)
         {
             // Essa verificacao é feita automaticamente a partir da versao 2.1
             // Porém ter que usar [ApiController] 
@@ -141,7 +142,7 @@ namespace ApiCatalogo.Controllers
                 var produto = _mapper.Map<Produto>(produtoDto);
 
                 _uof.ProdutoRepository.Update(produto);
-                _uof.Commit();
+                await _uof.Commit();
 
                 return Ok($"Produto com o id = {id} foi atualizado com sucesso");
             }
@@ -152,14 +153,14 @@ namespace ApiCatalogo.Controllers
             }
         }
         [HttpDelete("{id}")]
-        public ActionResult<ProdutoDTO> Delete (int id)
+        public async Task<ActionResult<ProdutoDTO>> Delete (int id)
         {
             //var produto = _context.Produtos.FirstOrDefault(p => p.ProdutoId == id);
             // Find só funciona se o parametro for a chave primaria
             try
             {
 
-                var produto = _uof.ProdutoRepository.GetById(p => p.ProdutoId == id);
+                var produto = await _uof.ProdutoRepository.GetById(p => p.ProdutoId == id);
 
                 if (produto == null)
                 {
@@ -167,7 +168,7 @@ namespace ApiCatalogo.Controllers
                 }
 
                 _uof.ProdutoRepository.Delete(produto);
-                _uof.Commit();
+                await _uof.Commit();
 
                 // Tem que exibir o produtoDto e nao o produto
                 var produtoDTO = _mapper.Map<ProdutoDTO>(produto);
