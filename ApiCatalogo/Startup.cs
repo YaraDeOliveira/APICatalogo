@@ -5,6 +5,7 @@ using ApiCatalogo.Filter;
 using ApiCatalogo.Logging;
 using ApiCatalogo.Repository;
 using AutoMapper;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
@@ -14,11 +15,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-
+using Microsoft.AspNetCore.Identity;
 
 namespace ApiCatalogo
 {
@@ -34,6 +31,8 @@ namespace ApiCatalogo
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            
+
             var mappingConfig = new MapperConfiguration(mc =>
             {
                 mc.AddProfile(new MappingProfile());
@@ -49,8 +48,13 @@ namespace ApiCatalogo
 
             string mySqlConnection = Configuration.GetConnectionString("DefaultConnection");
 
+
             services.AddDbContext<AppDbContext>(options =>
                 options.UseMySql(mySqlConnection, ServerVersion.AutoDetect(mySqlConnection)));
+
+            services.AddIdentity<IdentityUser, IdentityRole>()
+                .AddEntityFrameworkStores<AppDbContext>()
+                .AddDefaultTokenProviders();
 
             services.AddControllers().AddNewtonsoftJson(options =>
             {
@@ -70,6 +74,8 @@ namespace ApiCatalogo
         {
             // adiciona o middleware de tratamento de erros
             //app.ConfigureExceptionHandler();
+            app.UseAuthentication();
+            app.UseAuthorization();
 
 
             if (env.IsDevelopment())
